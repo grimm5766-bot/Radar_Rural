@@ -61,7 +61,7 @@ npm --version
 Abra o PowerShell e entre na pasta do projeto:
 
 ```powershell
-cd "C:\Users\grimm\OneDrive\Documentos\Switch_Rural\sistema-gestao-agricola"
+cd "C:\Users\grimm\OneDrive\Documentos\Switch_Rural"
 code .
 ```
 
@@ -189,6 +189,15 @@ O tenant confiável deve vir da sessão validada no servidor.
 Para publicar o sistema, use PostgreSQL gerenciado no lugar do SQLite. As
 opções mais simples para este projeto são Neon ou Supabase; para uma operação
 maior e com equipe de infraestrutura, AWS RDS também é uma boa opção.
+
+O projeto Next.js está na raiz deste repositório para que a Vercel detecte o
+framework automaticamente. O script `postinstall` gera o Prisma Client durante
+cada instalação limpa e o comando de build repete essa geração por segurança.
+
+O SQLite local não deve ser usado como banco persistente na Vercel. As funções
+da plataforma possuem filesystem somente leitura, com `/tmp` temporário, e os
+dados seriam perdidos ou ficariam inconsistentes entre execuções. Configure um
+PostgreSQL antes de disponibilizar cadastros reais.
 
 Uma composição prática:
 
