@@ -1,0 +1,451 @@
+Você é um desenvolvedor full-stack sênior. Crie uma primeira versão funcional, em formato MVP, de um sistema de gestão agrícola para acompanhamento de lavoura de soja em uma fazenda de 200 hectares.
+
+O sistema deve ter dois perfis principais:
+
+1. Agrônomo
+2. Produtor
+
+Use uma stack simples e moderna, preferencialmente:
+
+* Front-end: React ou Next.js
+* Back-end: Node.js com Express ou API Routes do Next.js
+* Banco de dados inicial: SQLite ou PostgreSQL com Prisma
+* Autenticação simples por perfil de usuário
+* Dashboard com gráficos usando uma biblioteca como Chart.js ou Recharts
+* Aplicativo responsivo, funcionando bem em computador e celular
+
+Crie uma primeira versão funcional com código organizado, rotas, componentes, modelos de dados e telas principais.
+
+Contexto do sistema:
+
+O objetivo do sistema é permitir que o agrônomo registre informações de campo durante o ciclo da soja, acompanhe ocorrências críticas como pragas e doenças, registre fotos geolocalizadas e envie essas informações para que o produtor visualize um dashboard com previsão de safra, alertas e progresso da lavoura.
+
+Requisitos principais do sistema:
+
+MÓDULO DO AGRÔNOMO
+
+1. Checklist de vistoria
+
+Criar uma tela para o agrônomo registrar uma vistoria de campo.
+
+Campos obrigatórios:
+
+* Talhão
+* Data da vistoria
+* Dia do ciclo da soja
+* Fase fenológica
+* Umidade do solo
+* Altura média da planta
+* Pragas encontradas
+* Doenças encontradas
+* Plantas daninhas encontradas
+* Observações gerais
+
+O sistema deve considerar que o ciclo total da soja é de 120 dias.
+
+2. Registro de amostragem para cálculo de produtividade
+
+Criar campos para o agrônomo informar:
+
+* Plantas por metro
+* Vagens por planta
+* Grãos por vagem
+* Peso estimado de mil grãos, chamado PMG
+* Área do talhão em hectares
+
+Com base nesses dados, criar uma estimativa simples de produtividade em kg e sacas por hectare.
+
+Considere que 1 saca de soja possui 60 kg.
+
+Deixe o cálculo em uma função separada para facilitar ajustes futuros.
+
+3. Registro de ocorrências críticas
+
+Criar uma tela ou seção onde o agrônomo possa registrar rapidamente uma ocorrência.
+
+Campos:
+
+* Talhão
+* Tipo de ocorrência: praga, doença ou planta daninha
+* Nome da ocorrência, por exemplo Ferrugem Asiática
+* Gravidade: baixa, média ou alta
+* Data da ocorrência
+* Descrição
+* Status: aberta, em controle ou resolvida
+
+4. Controle de manejo
+
+Permitir que o agrônomo abra um chamado de controle para uma ocorrência.
+
+Exemplo:
+
+* Aplicação de fungicida
+* Aplicação de herbicida
+* Controle biológico
+* Outra ação de manejo
+
+Campos:
+
+* Ocorrência relacionada
+* Tipo de manejo
+* Data de abertura
+* Data de fechamento
+* Responsável
+* Observações
+
+Quando a data de fechamento for preenchida, o sistema deve calcular automaticamente quantos dias demorou para conter o problema.
+
+5. Captura de fotos geolocalizadas
+
+Criar estrutura para anexar fotos a uma vistoria ou ocorrência.
+
+Para a primeira versão, pode usar upload local ou simulação de upload.
+
+Campos da foto:
+
+* Arquivo da imagem
+* Latitude
+* Longitude
+* Data
+* Vistoria ou ocorrência relacionada
+
+No front-end, usar a API de geolocalização do navegador para capturar latitude e longitude quando possível.
+
+6. Funcionamento offline
+
+Implementar uma primeira versão de funcionamento offline no front-end.
+
+Quando o agrônomo estiver sem internet, os dados de vistoria, ocorrência e fotos devem ser salvos localmente usando localStorage ou IndexedDB.
+
+Quando a internet voltar, criar uma rotina de sincronização que envie os dados pendentes para o servidor.
+
+Na primeira versão, pode ser uma sincronização simples com uma fila local de registros pendentes.
+
+MÓDULO DO PRODUTOR
+
+1. Dashboard principal
+
+Criar uma tela principal para o produtor com visão geral da fazenda.
+
+Mostrar:
+
+* Total de hectares
+* Número de talhões cadastrados
+* Dia atual do ciclo
+* Fase atual da lavoura
+* Estimativa atual de produtividade
+* Quantidade de alertas abertos
+* Quantidade de ocorrências críticas
+
+2. Gráfico visual do ciclo de 120 dias
+
+Criar um gráfico de linha ou timeline mostrando os 120 dias do ciclo da soja.
+
+O gráfico deve exibir marcações nos dias em que ocorreram:
+
+* Vistorias
+* Ocorrências
+* Problemas críticos
+* Ações de manejo
+
+Usar cores intuitivas:
+
+* Verde: normal
+* Amarelo: atenção
+* Vermelho: crítico
+
+3. Previsão de safra dinâmica
+
+A cada nova amostragem registrada pelo agrônomo, o sistema deve recalcular a previsão de safra.
+
+Mostrar:
+
+* Estimativa em kg por hectare
+* Estimativa em sacas por hectare
+* Estimativa total considerando todos os talhões
+* Estimativa total para os 200 hectares
+
+4. Histórico de alertas
+
+Criar uma tela com lista de problemas detectados.
+
+Mostrar:
+
+* Talhão
+* Tipo de problema
+* Nome da ocorrência
+* Gravidade
+* Data de abertura
+* Data de fechamento
+* Tempo de resposta em dias
+* Impacto estimado na produção
+* Status
+
+5. Resumo de progresso do ciclo
+
+Criar uma barra de progresso mostrando:
+
+* Dia atual do ciclo
+* Total de 120 dias
+* Porcentagem concluída
+* Fase atual da planta
+
+Exemplo:
+
+Dia 45 de 120 — 37,5% concluído — Fase vegetativa.
+
+REGRAS DE NEGÓCIO
+
+1. Divisão por talhões
+
+O sistema deve permitir dividir a fazenda em talhões.
+
+Exemplo:
+
+* Talhão A: 50 hectares
+* Talhão B: 150 hectares
+
+Cada vistoria, ocorrência, foto, amostragem e manejo deve estar ligado a um talhão.
+
+2. Vazio sanitário
+
+Criar uma regra para impedir o início de um novo ciclo de soja dentro do período do vazio sanitário da região cadastrada.
+
+Para a primeira versão, considere Goiás como padrão.
+
+Exemplo:
+
+* Bloquear início de ciclo entre junho e setembro.
+* Exibir mensagem de erro caso o usuário tente criar um ciclo nesse período.
+
+Deixe essa regra em uma função separada para facilitar alterações futuras.
+
+3. Notificações
+
+Criar uma estrutura inicial para notificações.
+
+Quando o agrônomo registrar uma ocorrência com gravidade alta, o sistema deve criar uma notificação para o produtor.
+
+Na primeira versão, simular o envio por WhatsApp ou push notification apenas registrando a notificação no banco e exibindo no dashboard.
+
+REQUISITOS NÃO FUNCIONAIS
+
+1. Interface simples e direta
+
+O sistema deve ter uma interface limpa, com:
+
+* Fontes grandes
+* Cards visuais
+* Ícones explicativos
+* Cores intuitivas
+* Layout responsivo
+* Menu lateral ou superior separando Agrônomo e Produtor
+
+2. Desempenho
+
+O dashboard do produtor deve carregar rapidamente.
+
+Evite consultas desnecessárias.
+
+3. Segurança básica
+
+Criar autenticação simples com login e senha.
+
+Cada produtor deve visualizar apenas os dados da própria fazenda.
+
+Cada agrônomo deve registrar dados apenas nas fazendas ou talhões vinculados a ele.
+
+4. Privacidade
+
+Estruturar o banco para separar dados por fazenda, produtor e talhão.
+
+MODELOS DE DADOS SUGERIDOS
+
+Crie os seguintes modelos ou tabelas:
+
+User:
+
+* id
+* nome
+* email
+* senha
+* perfil: AGRONOMO ou PRODUTOR
+
+Farm:
+
+* id
+* nome
+* produtorId
+* areaTotalHectares
+
+FieldPlot:
+
+* id
+* nome
+* areaHectares
+* farmId
+
+CropCycle:
+
+* id
+* farmId
+* dataInicio
+* dataFimPrevista
+* cultura
+* status
+* diaAtual
+
+Inspection:
+
+* id
+* fieldPlotId
+* agronomoId
+* data
+* diaCiclo
+* faseFenologica
+* umidadeSolo
+* alturaPlanta
+* pragas
+* doencas
+* daninhas
+* observacoes
+
+Sampling:
+
+* id
+* inspectionId
+* plantasPorMetro
+* vagensPorPlanta
+* graosPorVagem
+* pesoMilGraos
+* produtividadeKgHa
+* produtividadeSacasHa
+
+Occurrence:
+
+* id
+* fieldPlotId
+* inspectionId
+* tipo
+* nome
+* gravidade
+* dataOcorrencia
+* descricao
+* status
+
+ManagementCall:
+
+* id
+* occurrenceId
+* tipoManejo
+* dataAbertura
+* dataFechamento
+* responsavel
+* observacoes
+* diasResposta
+
+GeoPhoto:
+
+* id
+* inspectionId
+* occurrenceId
+* urlImagem
+* latitude
+* longitude
+* data
+
+Notification:
+
+* id
+* userId
+* titulo
+* mensagem
+* tipo
+* lida
+* dataCriacao
+
+TELAS QUE DEVEM SER CRIADAS
+
+1. Tela de login
+2. Dashboard do produtor
+3. Cadastro/listagem de fazendas
+4. Cadastro/listagem de talhões
+5. Cadastro de ciclo da soja
+6. Tela de vistoria do agrônomo
+7. Tela de amostragem e cálculo de produtividade
+8. Tela de ocorrências críticas
+9. Tela de chamados de manejo
+10. Tela de histórico de alertas
+11. Tela de notificações
+12. Tela de fotos geolocalizadas
+
+FUNCIONALIDADES MÍNIMAS DA PRIMEIRA VERSÃO
+
+A primeira versão precisa permitir:
+
+* Criar usuários com perfil de produtor ou agrônomo
+* Fazer login
+* Criar uma fazenda
+* Dividir a fazenda em talhões
+* Criar um ciclo de soja respeitando a regra do vazio sanitário
+* Registrar vistoria
+* Registrar amostragem
+* Calcular produtividade estimada
+* Registrar ocorrência crítica
+* Abrir e fechar chamado de manejo
+* Calcular tempo de resposta do chamado
+* Anexar foto simulada com latitude e longitude
+* Exibir dashboard do produtor com cards e gráficos
+* Exibir alertas e notificações
+* Salvar dados offline no navegador quando estiver sem internet
+* Sincronizar dados pendentes quando a conexão voltar
+
+DADOS INICIAIS PARA TESTE
+
+Crie seed ou dados mockados com:
+
+* Um produtor
+* Um agrônomo
+* Uma fazenda de 200 hectares
+* Dois talhões:
+
+  * Talhão A com 50 hectares
+  * Talhão B com 150 hectares
+* Um ciclo de soja de 120 dias
+* Algumas vistorias simuladas
+* Uma ocorrência de Ferrugem Asiática com gravidade alta
+* Um chamado de aplicação de fungicida
+* Uma notificação para o produtor
+
+ORGANIZAÇÃO DO CÓDIGO
+
+Organize o projeto com:
+
+* Componentes reutilizáveis
+* Serviços de API
+* Funções utilitárias para cálculo de produtividade
+* Função separada para validar vazio sanitário
+* Função separada para cálculo de dias de resposta
+* Função separada para sincronização offline
+* Código comentado nos pontos principais
+
+ENTREGA ESPERADA
+
+Gere o projeto completo com:
+
+* Estrutura de pastas
+* Código do front-end
+* Código do back-end
+* Modelos do banco de dados
+* Scripts de instalação
+* Scripts para rodar o projeto
+* Arquivo README.md explicando como instalar, configurar e executar
+* Exemplos de login dos usuários de teste
+
+IMPORTANTE
+
+Não crie apenas telas estáticas. A primeira versão deve ter fluxo funcional, mesmo que simplificado.
+
+Pode usar dados mockados quando necessário, mas deixe a estrutura pronta para evoluir para banco real, autenticação mais segura e integração real com WhatsApp futuramente.
+
+Priorize uma versão limpa, funcional e fácil de apresentar como protótipo acadêmico ou MVP.

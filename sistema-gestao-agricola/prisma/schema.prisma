@@ -1,0 +1,275 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum UserRole {
+  AGRONOMO
+  PRODUTOR
+  DESENVOLVEDOR
+}
+
+enum CycleStatus {
+  PLANEJADO
+  ATIVO
+  CONCLUIDO
+}
+
+enum OccurrenceType {
+  PRAGA
+  DOENCA
+  PLANTA_DANINHA
+}
+
+enum Severity {
+  BAIXA
+  MEDIA
+  ALTA
+}
+
+enum OccurrenceStatus {
+  ABERTA
+  EM_CONTROLE
+  RESOLVIDA
+}
+
+enum NotificationType {
+  INFO
+  ALERTA
+  CRITICA
+}
+
+model User {
+  id                  String            @id @default(cuid())
+  tenantId            String?
+  nome                String
+  email               String            @unique
+  senhaHash           String
+  googleSubject       String?           @unique
+  avatarUrl           String?
+  perfil              UserRole
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  tenant              Tenant?           @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  farmsOwned          Farm[]            @relation("FarmProducer")
+  agronomistFarms     FarmAgronomist[]
+  inspections         Inspection[]
+  notifications       Notification[]
+
+  @@index([tenantId, perfil])
+}
+
+model Tenant {
+  id                  String            @id @default(cuid())
+  nome                String
+  slug                String            @unique
+  ativo               Boolean           @default(true)
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  users               User[]
+  farms               Farm[]
+  farmAgronomists     FarmAgronomist[]
+  fieldPlots          FieldPlot[]
+  cropCycles          CropCycle[]
+  inspections         Inspection[]
+  samplings           Sampling[]
+  occurrences         Occurrence[]
+  managementCalls     ManagementCall[]
+  geoPhotos           GeoPhoto[]
+  notifications       Notification[]
+}
+
+model Farm {
+  id                  String            @id @default(cuid())
+  tenantId            String
+  nome                String
+  produtorId          String
+  areaTotalHectares   Float
+  regiao              String            @default("GO")
+  centerLatitude      Float?
+  centerLongitude     Float?
+  boundaryJson        String?
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  tenant              Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  produtor            User              @relation("FarmProducer", fields: [produtorId], references: [id])
+  agronomists         FarmAgronomist[]
+  fieldPlots          FieldPlot[]
+  cropCycles          CropCycle[]
+
+  @@index([tenantId, produtorId])
+}
+
+model FarmAgronomist {
+  tenantId     String
+  farmId       String
+  agronomistId String
+  tenant       Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  farm         Farm   @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  agronomist   User   @relation(fields: [agronomistId], references: [id], onDelete: Cascade)
+
+  @@id([farmId, agronomistId])
+  @@index([tenantId, agronomistId])
+}
+
+model FieldPlot {
+  id              String           @id @default(cuid())
+  tenantId        String
+  nome            String
+  areaHectares    Float
+  farmId          String
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  tenant          Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  farm            Farm             @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  inspections     Inspection[]
+  occurrences     Occurrence[]
+
+  @@unique([farmId, nome])
+  @@index([tenantId, farmId])
+}
+
+model CropCycle {
+  id              String       @id @default(cuid())
+  tenantId        String
+  farmId          String
+  dataInicio      DateTime
+  dataFimPrevista DateTime
+  cultura         String       @default("Soja")
+  status          CycleStatus  @default(PLANEJADO)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  tenant          Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  farm            Farm         @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  inspections     Inspection[]
+
+  @@index([tenantId, farmId, dataInicio])
+}
+
+model Inspection {
+  id                String      @id @default(cuid())
+  tenantId          String
+  fieldPlotId       String
+  cropCycleId       String?
+  agronomoId        String
+  data              DateTime
+  diaCiclo          Int
+  faseFenologica    String
+  umidadeSolo       Float
+  alturaPlanta      Float
+  pragas            String
+  doencas           String
+  daninhas          String
+  observacoes       String
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  tenant            Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  fieldPlot         FieldPlot   @relation(fields: [fieldPlotId], references: [id], onDelete: Cascade)
+  cropCycle         CropCycle?  @relation(fields: [cropCycleId], references: [id], onDelete: SetNull)
+  agronomo          User        @relation(fields: [agronomoId], references: [id])
+  sampling          Sampling?
+  occurrences       Occurrence[]
+  photos            GeoPhoto[]
+
+  @@index([tenantId, fieldPlotId, data])
+  @@index([tenantId, agronomoId])
+}
+
+model Sampling {
+  id                    String     @id @default(cuid())
+  tenantId              String
+  inspectionId          String     @unique
+  plantasPorMetro       Float
+  vagensPorPlanta       Float
+  graosPorVagem         Float
+  pesoMilGraos          Float
+  areaTalhaoHectares    Float
+  produtividadeKgHa     Float
+  produtividadeSacasHa  Float
+  estimativaTotalKg     Float
+  createdAt             DateTime   @default(now())
+  updatedAt             DateTime   @updatedAt
+  tenant                Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  inspection            Inspection @relation(fields: [inspectionId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+}
+
+model Occurrence {
+  id                String            @id @default(cuid())
+  tenantId          String
+  fieldPlotId       String
+  inspectionId      String?
+  tipo              OccurrenceType
+  nome              String
+  gravidade         Severity
+  dataOcorrencia    DateTime
+  descricao         String
+  status            OccurrenceStatus  @default(ABERTA)
+  impactoEstimado   Float             @default(0)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  tenant            Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  fieldPlot         FieldPlot         @relation(fields: [fieldPlotId], references: [id], onDelete: Cascade)
+  inspection        Inspection?       @relation(fields: [inspectionId], references: [id], onDelete: SetNull)
+  managementCalls   ManagementCall[]
+  photos            GeoPhoto[]
+
+  @@index([tenantId, fieldPlotId, dataOcorrencia])
+  @@index([tenantId, status, gravidade])
+}
+
+model ManagementCall {
+  id              String      @id @default(cuid())
+  tenantId        String
+  occurrenceId    String
+  tipoManejo      String
+  dataAbertura    DateTime
+  dataFechamento  DateTime?
+  responsavel     String
+  observacoes     String
+  diasResposta    Int?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  tenant          Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  occurrence      Occurrence  @relation(fields: [occurrenceId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, occurrenceId])
+}
+
+model GeoPhoto {
+  id              String       @id @default(cuid())
+  tenantId        String
+  inspectionId    String?
+  occurrenceId    String?
+  urlImagem       String
+  latitude        Float
+  longitude       Float
+  data            DateTime
+  createdAt       DateTime     @default(now())
+  tenant          Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  inspection      Inspection?  @relation(fields: [inspectionId], references: [id], onDelete: Cascade)
+  occurrence      Occurrence?  @relation(fields: [occurrenceId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, inspectionId])
+  @@index([tenantId, occurrenceId])
+}
+
+model Notification {
+  id          String            @id @default(cuid())
+  tenantId    String
+  userId      String
+  titulo      String
+  mensagem    String
+  tipo        NotificationType  @default(INFO)
+  lida        Boolean           @default(false)
+  dataCriacao DateTime          @default(now())
+  tenant      Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, userId, lida, dataCriacao])
+}
