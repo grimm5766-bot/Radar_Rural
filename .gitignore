@@ -5,6 +5,9 @@ prisma/dev.db
 prisma/dev.db-journal
 prisma/dev.db-shm
 prisma/dev.db-wal
+prisma/deployment.db
+prisma/deployment.db-shm
+prisma/deployment.db-wal
 npm-debug.log*
 *.tsbuildinfo
 dev-server*.log

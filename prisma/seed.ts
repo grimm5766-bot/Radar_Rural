@@ -20,7 +20,7 @@ const adapter = new PrismaBetterSqlite3({
 });
 const prisma = new PrismaClient({ adapter });
 
-async function main() {
+export async function seedDatabase() {
   await prisma.notification.deleteMany();
   await prisma.geoPhoto.deleteMany();
   await prisma.managementCall.deleteMany();
@@ -292,7 +292,7 @@ async function main() {
   console.log("Desenvolvedor: dev@switchrural.com / 123456");
 }
 
-main()
+await seedDatabase()
   .catch((error) => {
     console.error(error);
     process.exit(1);

@@ -199,6 +199,11 @@ da plataforma possuem filesystem somente leitura, com `/tmp` temporário, e os
 dados seriam perdidos ou ficariam inconsistentes entre execuções. Configure um
 PostgreSQL antes de disponibilizar cadastros reais.
 
+Enquanto `DATABASE_URL` não estiver configurada na Vercel, o deploy cria uma
+cópia temporária dos dados de demonstração em `/tmp`. Isso permite apresentar o
+login e os dashboards, mas alterações podem desaparecer a qualquer momento e
+não são compartilhadas de forma confiável entre instâncias.
+
 Uma composição prática:
 
 1. Hospede o Next.js na Vercel.
